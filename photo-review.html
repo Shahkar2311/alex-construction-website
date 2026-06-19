@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Review — Kratz Homes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #c9a84c;
+      --green: #22c55e;
+      --red: #ef4444;
+      --green-bg: rgba(34,197,94,0.12);
+      --red-bg: rgba(239,68,68,0.12);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px;
+    }
+    .header h1 { font-size: 1.4rem; font-weight: 700; }
+    .header p { color: var(--muted); font-size: 0.875rem; margin-top: 6px; line-height: 1.5; max-width: 640px; }
+
+    .progress-bar-wrap {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-fill  { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; width: 0%; }
+    .progress-label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+    .main { max-width: 1200px; margin: 0 auto; padding: 40px 32px 80px; }
+
+    .project-section { margin-bottom: 56px; }
+    .project-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .project-header h2 { font-size: 1.1rem; font-weight: 600; }
+    .project-header .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(201,168,76,0.15);
+      color: var(--accent);
+    }
+    .project-header .photo-count { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-item {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+    .photo-item.confirmed { border-color: var(--green); }
+    .photo-item.moving    { border-color: var(--red); }
+    .photo-item.cover     { border-color: var(--accent); }
+    .photo-item.confirmed.cover { border-color: var(--accent); }
+
+    .cover-badge {
+      display: none;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--accent);
+      color: #000;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+    .photo-item.cover .cover-badge { display: block; }
+
+    .photo-thumb {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .photo-actions {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .photo-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-confirm, .btn-move {
+      flex: 1;
+      padding: 7px 4px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-confirm {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .btn-confirm:hover, .btn-confirm.active {
+      background: var(--green);
+      color: #000;
+    }
+    .btn-move {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .btn-move:hover, .btn-move.active {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn-cover {
+      width: 100%;
+      padding: 7px 4px;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: rgba(201,168,76,0.1);
+      color: var(--accent);
+      font-family: inherit;
+    }
+    .btn-cover:hover, .btn-cover.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .move-dropdown {
+      display: none;
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .move-dropdown.visible { display: block; }
+    .move-dropdown option { background: #1e1e1e; }
+
+    .notes-input {
+      display: none;
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      resize: none;
+      height: 48px;
+    }
+    .notes-input.visible { display: block; }
+
+    /* Lightbox */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    .lb-overlay.open { display: flex; }
+    .lb-overlay img { max-width: 90vw; max-height: 88vh; border-radius: 8px; object-fit: contain; }
+    .lb-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Submit section */
+    .submit-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 560px;
+      margin: 40px auto 0;
+    }
+    .submit-section h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .submit-section p  { font-size: 0.875rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+    .submit-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .submit-row input {
+      flex: 1;
+      background: #1e1e1e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.875rem;
+    }
+    .submit-row input::placeholder { color: var(--muted); }
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .btn-submit:hover { opacity: 0.88; }
+
+    .thankyou {
+      display: none;
+      text-align: center;
+      padding: 32px;
+    }
+    .thankyou h3 { font-size: 1.2rem; margin-bottom: 8px; }
+    .thankyou p  { color: var(--muted); font-size: 0.875rem; }
+
+    .summary-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .header, .progress-bar-wrap, .main { padding-left: 16px; padding-right: 16px; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .submit-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Photo Review — Kratz Homes</h1>
+  <p>Go through each photo below. Tap <strong style="color:var(--green)">Correct</strong> if it belongs, or <strong style="color:var(--red)">Move it</strong> if it's in the wrong project. For each project, tap <strong style="color:var(--accent)">★ Set as cover</strong> on the one photo you want showing on the front of that project's card. Don't worry about getting everything perfect — just flag what stands out.</p>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">0 of 0 reviewed</div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<div class="lb-overlay" id="lbOverlay">
+  <button class="lb-close" id="lbClose">×</button>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<script>
+const PROJECTS = [
+  {
+    id: 'princess',
+    title: 'Modern Infill — Princess Street',
+    badge: 'Custom Home',
+    photos: Array.from({length:37}, (_,i) => `images/gallery/2208-princess-${String(i+1).padStart(2,'0')}.jpg`).filter(p => !p.includes('-14.'))
+  },
+  {
+    id: 'harbour',
+    title: '4-Bedroom Custom Home',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-sandpiper.jpg','images/gallery/feat-harbour.jpg','images/gallery/proj-reno-foyer.jpg','images/gallery/int-loft.jpg','images/gallery/int-living1.jpg','images/gallery/proj-reno-bathroom.jpg','images/gallery/proj-reno-kitchen.jpg','images/gallery/int-kitchen2.jpg','images/gallery/int-living2.jpg','images/gallery/int-stairs1.jpg','images/gallery/int-stairs2.jpg','images/gallery/int-loft2.jpg','images/gallery/int-living4.jpg','images/gallery/ext-gold-4bed.jpg','images/gallery/ext-night-4bed.jpg','images/gallery/int-closet.jpg','images/gallery/ext-composite.jpg']
+  },
+  {
+    id: 'twostorey',
+    title: 'Two-Storey Family Home',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-sage-4342.jpg','images/gallery/proj-sage-4328.jpg','images/gallery/proj-waterfront.jpg','images/gallery/ext-twostorey-snow.jpg','images/gallery/ext-waterfront.jpg','images/gallery/ext-waterfront2.jpg','images/gallery/ext-brick-gold.jpg','images/gallery/ext-brick-gold2.jpg','images/gallery/ext-night-2.jpg','images/gallery/ext-beige.jpg','images/gallery/ext-tan.jpg','images/gallery/ext-tan2.jpg','images/gallery/ext-subdivision.jpg','images/gallery/ext-finished.jpg']
+  },
+  {
+    id: 'bungalow',
+    title: 'Executive Bungalow',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-wimbledon.jpg','images/gallery/proj-wascana.jpg','images/gallery/proj-alport.jpg']
+  },
+  {
+    id: 'acreage',
+    title: 'Acreage Dream Home',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-chuka.jpg']
+  },
+  {
+    id: 'mastersuite',
+    title: 'Master Suite Addition',
+    badge: 'Renovation',
+    photos: ['images/gallery/proj-reno-bathroom.jpg','images/gallery/int-bath2.jpg','images/gallery/reno-bath-subway.jpg','images/gallery/reno-bath-grey.jpg','images/gallery/reno-vanity.jpg','images/gallery/reno-vanity2.jpg','images/gallery/reno-closet.jpg']
+  },
+  {
+    id: 'basement',
+    title: 'Full Basement Development',
+    badge: 'Renovation',
+    photos: ['images/gallery/proj-reno-living.jpg','images/gallery/int-living1.jpg','images/gallery/int-living3.jpg','images/gallery/int-hallway.jpg','images/gallery/bsmt-drywall.jpg','images/gallery/bsmt-frame.jpg','images/gallery/bsmt-frame2.jpg','images/gallery/bsmt-insul.jpg']
+  },
+  {
+    id: 'legalsuite',
+    title: 'Legal Suite Basement',
+    badge: 'Renovation',
+    photos: ['images/gallery/proj-reno-foyer.jpg','images/gallery/int-foyer2.jpg','images/gallery/int-loft.jpg','images/gallery/int-living6.jpg']
+  },
+  {
+    id: 'mainfloor',
+    title: 'Main Floor Renovation',
+    badge: 'Renovation',
+    photos: ['images/gallery/proj-reno-kitchen.jpg','images/gallery/int-kitchen2.jpg','images/gallery/int-kitchen3.jpg','images/gallery/int-living5.jpg','images/gallery/reno-bath-subway.jpg','images/gallery/reno-closet.jpg','images/gallery/reno-vanity2.jpg']
+  },
+  {
+    id: 'warehouse',
+    title: 'Commercial Warehouse Fit-Out',
+    badge: 'Commercial',
+    photos: ['images/gallery/proj-comm-warehouse.jpg','images/gallery/comm-reno.jpg','images/gallery/comm-hallway.jpg','images/gallery/comm-empty.jpg']
+  },
+  {
+    id: 'commercial',
+    title: 'Commercial Interior Build',
+    badge: 'Commercial',
+    photos: ['images/gallery/proj-comm-interior.jpg','images/gallery/comm-office.jpg','images/gallery/comm-hallway.jpg','images/gallery/comm-empty.jpg']
+  },
+  {
+    id: 'alport',
+    title: 'Residential Development — Alport Cres',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-alport.jpg']
+  },
+  {
+    id: 'wascana',
+    title: 'Custom Home — Wascana Meadow',
+    badge: 'Custom Home',
+    photos: ['images/gallery/proj-wascana.jpg']
+  }
+];
+
+const projectNames = PROJECTS.map(p => p.title);
+const decisions = {}; // key: "projectId::photoPath" => { status: 'confirm'|'move', moveTo: '', notes: '' }
+const coverPhotos = {}; // key: projectId => photoPath
+
+function totalPhotos() { return PROJECTS.reduce((s,p) => s + p.photos.length, 0); }
+function reviewedCount() { return Object.keys(decisions).length; }
+
+function updateProgress() {
+  const total = totalPhotos();
+  const done  = reviewedCount();
+  const pct   = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = done + ' of ' + total + ' reviewed';
+}
+
+function buildKey(projectId, photo) { return projectId + '::' + photo; }
+
+function render() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '';
+
+  PROJECTS.forEach(project => {
+    const sec = document.createElement('div');
+    sec.className = 'project-section';
+    sec.innerHTML = `
+      <div class="project-header">
+        <h2>${project.title}</h2>
+        <span class="badge">${project.badge}</span>
+        <span class="photo-count">${project.photos.length} photo${project.photos.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="photo-grid" id="grid-${project.id}"></div>
+    `;
+    main.appendChild(sec);
+
+    const grid = sec.querySelector(`#grid-${project.id}`);
+
+    project.photos.forEach(photo => {
+      const key = buildKey(project.id, photo);
+      const dec = decisions[key] || {};
+
+      const item = document.createElement('div');
+      item.className = 'photo-item' + (dec.status === 'confirm' ? ' confirmed' : dec.status === 'move' ? ' moving' : '');
+      item.dataset.key = key;
+
+      const dropdownOptions = projectNames
+        .filter(n => n !== project.title)
+        .map(n => `<option value="${n}"${dec.moveTo === n ? ' selected' : ''}>${n}</option>`)
+        .join('');
+
+      const isCover = coverPhotos[project.id] === photo;
+      item.innerHTML = `
+        <span class="cover-badge">★ Cover photo</span>
+        <img class="photo-thumb" src="${photo}" alt="" loading="lazy">
+        <div class="photo-actions">
+          <div class="photo-btns">
+            <button class="btn-confirm${dec.status === 'confirm' ? ' active' : ''}">✓ Correct</button>
+            <button class="btn-move${dec.status === 'move' ? ' active' : ''}">↗ Move it</button>
+          </div>
+          <button class="btn-cover${isCover ? ' active' : ''}">★ Set as cover</button>
+          <select class="move-dropdown${dec.status === 'move' ? ' visible' : ''}">
+            <option value="">— Move to which project? —</option>
+            ${dropdownOptions}
+          </select>
+          <textarea class="notes-input${dec.status === 'move' ? ' visible' : ''}" placeholder="Any notes? (optional)">${dec.notes || ''}</textarea>
+        </div>
+      `;
+      if (isCover) item.classList.add('cover');
+
+      const img       = item.querySelector('.photo-thumb');
+      const btnOk     = item.querySelector('.btn-confirm');
+      const btnMove   = item.querySelector('.btn-move');
+      const btnCover  = item.querySelector('.btn-cover');
+      const dropdown  = item.querySelector('.move-dropdown');
+      const notes     = item.querySelector('.notes-input');
+
+      img.addEventListener('click', () => openLightbox(photo));
+
+      btnCover.addEventListener('click', () => {
+        // Deselect previous cover in this project
+        const prevCover = coverPhotos[project.id];
+        if (prevCover && prevCover !== photo) {
+          const prevKey = buildKey(project.id, prevCover);
+          const prevItem = document.querySelector(`[data-key="${prevKey}"]`);
+          if (prevItem) {
+            prevItem.classList.remove('cover');
+            prevItem.querySelector('.btn-cover').classList.remove('active');
+          }
+        }
+        if (coverPhotos[project.id] === photo) {
+          // Toggle off
+          coverPhotos[project.id] = null;
+          item.classList.remove('cover');
+          btnCover.classList.remove('active');
+        } else {
+          coverPhotos[project.id] = photo;
+          item.classList.add('cover');
+          btnCover.classList.add('active');
+        }
+      });
+
+      btnOk.addEventListener('click', () => {
+        decisions[key] = { status: 'confirm', moveTo: '', notes: '' };
+        item.className = 'photo-item confirmed';
+        btnOk.classList.add('active'); btnMove.classList.remove('active');
+        dropdown.classList.remove('visible'); notes.classList.remove('visible');
+        updateProgress();
+      });
+
+      btnMove.addEventListener('click', () => {
+        if (!decisions[key]) decisions[key] = {};
+        decisions[key].status = 'move';
+        item.className = 'photo-item moving';
+        btnMove.classList.add('active'); btnOk.classList.remove('active');
+        dropdown.classList.add('visible'); notes.classList.add('visible');
+        updateProgress();
+      });
+
+      dropdown.addEventListener('change', () => {
+        if (!decisions[key]) decisions[key] = { status: 'move' };
+        decisions[key].moveTo = dropdown.value;
+      });
+
+      notes.addEventListener('input', () => {
+        if (!decisions[key]) decisions[key] = { status: 'move' };
+        decisions[key].notes = notes.value;
+      });
+
+      grid.appendChild(item);
+    });
+  });
+
+  // Submit section
+  const submitSection = document.createElement('div');
+  submitSection.className = 'submit-section';
+  submitSection.innerHTML = `
+    <div id="submitForm">
+      <h3>Done reviewing?</h3>
+      <p>Hit send and we'll take it from there. You don't need to review every photo — just flag what stands out.</p>
+      <div class="submit-row">
+        <input type="text"  id="reviewName"  placeholder="Your name" value="Alex Kratz">
+        <input type="email" id="reviewEmail" placeholder="Your email" value="sales@kratzhomes.ca">
+      </div>
+      <button class="btn-submit" id="reviewSubmit">Send my review</button>
+      <p class="summary-note" id="summaryNote"></p>
+    </div>
+    <div class="thankyou" id="reviewThankyou">
+      <h3>Got it — thanks, Alex.</h3>
+      <p>We'll sort the photos and let you know when the gallery is updated.</p>
+    </div>
+  `;
+  main.appendChild(submitSection);
+
+  document.getElementById('reviewSubmit').addEventListener('click', submitReview);
+}
+
+function submitReview() {
+  const name  = document.getElementById('reviewName').value.trim();
+  const email = document.getElementById('reviewEmail').value.trim();
+
+  const moves    = [];
+  const confirmed = [];
+
+  PROJECTS.forEach(project => {
+    project.photos.forEach(photo => {
+      const key = buildKey(project.id, photo);
+      const dec = decisions[key];
+      if (!dec) return;
+      if (dec.status === 'move') {
+        moves.push({ photo: photo.split('/').pop(), currentProject: project.title, moveTo: dec.moveTo || 'unspecified', notes: dec.notes || '' });
+      } else if (dec.status === 'confirm') {
+        confirmed.push({ photo: photo.split('/').pop(), project: project.title });
+      }
+    });
+  });
+
+  const total = totalPhotos();
+  const skipped = total - reviewedCount();
+
+  const covers = Object.entries(coverPhotos)
+    .filter(([,photo]) => photo)
+    .map(([projectId, photo]) => ({
+      projectId,
+      projectTitle: PROJECTS.find(p => p.id === projectId)?.title || projectId,
+      coverPhoto: photo.split('/').pop()
+    }));
+
+  const payload = {
+    source: 'photo-review',
+    client: 'alex-construction',
+    submitted_at: new Date().toISOString(),
+    name, email,
+    summary: { total_photos: total, confirmed: confirmed.length, moves_requested: moves.length, covers_selected: covers.length, skipped },
+    covers,
+    moves,
+    confirmed
+  };
+
+  localStorage.setItem('kratz_photo_review_' + Date.now(), JSON.stringify(payload));
+
+  // Submit to server
+  fetch('/kratz/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    console.log('Feedback submitted:', data);
+    // Also save locally for debugging
+    localStorage.setItem('kratz_photo_feedback_submitted', JSON.stringify({...payload, status: 'submitted', timestamp: new Date().toISOString()}));
+  })
+  .catch(err => {
+    console.error('Feedback submission failed:', err);
+    // Fallback: mark as failed but saved locally
+    localStorage.setItem('kratz_photo_feedback_failed', JSON.stringify({...payload, status: 'failed', error: err.message}));
+  });
+
+  document.getElementById('submitForm').style.display = 'none';
+  document.getElementById('reviewThankyou').style.display = 'block';
+}
+
+// Lightbox
+function openLightbox(src) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lbOverlay').classList.add('open');
+}
+document.getElementById('lbClose').addEventListener('click', () => {
+  document.getElementById('lbOverlay').classList.remove('open');
+});
+document.getElementById('lbOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('lbOverlay').classList.remove('open');
+});
+
+render();
+updateProgress();
+</script>
+</body>
+</html>

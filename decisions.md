@@ -38,3 +38,19 @@ This file is the single source of truth for proven facts, confirmed capabilities
 ## Architectural Decisions
 
 *(none yet)*
+
+---
+
+## Giveaway Page Built — Pending Deployment (2026-06-23)
+
+**File:** `giveaway.html` — created 2026-06-23, matches site design system (Playfair Display + Inter, #1A1F2E background, #C9922A accent, same nav/footer as all other pages).
+
+**URL:** kratzhomes.ca/giveaway — 404 until deployed to Vercel.
+
+**Draw date:** July 4, 2026. Confirmed by Matthew. Entries close July 3 at 11:59 PM CST.
+
+**Prize:** Two Platinum Weekend Passes, Country Thunder Saskatchewan 2026.
+
+**Legal requirements included:** No-purchase-necessary statement, full Canadian eligibility (residents 18+), skill-testing question process, contest period, prize description with ARV, draw method, winner notification (Instagram DM + email), 72-hour response window, odds statement, sponsor name, privacy statement.
+
+**Deployment:** `vercel --prod` from alex-construction-website directory. Confirm with Matthew before deploying.*

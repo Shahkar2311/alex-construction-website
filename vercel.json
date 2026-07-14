@@ -1,6 +1,8 @@
 {
+  "redirects": [
+    { "source": "/giveaway", "destination": "/", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/giveaway", "destination": "/giveaway.html" },
     { "source": "/(.*)", "destination": "/$1" }
   ],
   "headers": [

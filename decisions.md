@@ -41,6 +41,12 @@ This file is the single source of truth for proven facts, confirmed capabilities
 
 ---
 
+## Giveaway Page Retired — Redirects to Homepage (2026-07-14)
+
+Country Thunder 2026 giveaway campaign ended (draw was July 4, festival ended July 12). `/giveaway` now 302-redirects to `/` instead of serving `giveaway.html`, so any of the ~18 already-published social posts still linking to it land somewhere real instead of a dead entry form. `giveaway.html` itself was left in place, not deleted, in case the redirect needs to be reverted. The entry form's backend (on the SDFY Railway server) still exists but will simply stop receiving traffic once nothing links to the page.
+
+---
+
 ## Giveaway Page Built — Pending Deployment (2026-06-23)
 
 **File:** `giveaway.html` — created 2026-06-23, matches site design system (Playfair Display + Inter, #1A1F2E background, #C9922A accent, same nav/footer as all other pages).
